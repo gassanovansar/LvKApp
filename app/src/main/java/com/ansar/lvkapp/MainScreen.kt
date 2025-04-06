@@ -1,41 +1,70 @@
 package com.ansar.lvkapp
 
+import android.widget.Toast
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import com.image.cropview.CropType
+import com.image.cropview.EdgeType
+import com.image.cropview.ImageCrop
 import kotlin.math.roundToInt
 
 class MainScreen : Screen {
 
+    private lateinit var imageCrop: ImageCrop
+
     @Composable
     override fun Content() {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.safeContent)
         ) {
             val res = LocalContext.current.resources
             var image1 by remember {
@@ -75,10 +104,13 @@ class MainScreen : Screen {
                 }
             )
 
+
+
+
+
             Movable(image = image1, state)
             Movable(image = image2, state)
             Movable(image = image3, state)
-        }
     }
 }
 
@@ -100,6 +132,7 @@ private fun Movable(
     image: ImageBitmap,
     state: State
 ) {
+    var image by remember { mutableStateOf(image) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
 
@@ -127,14 +160,17 @@ private fun Movable(
                 }
             }
     ) {
-        Image(
-            bitmap = image,
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
+
 
         if (state == State.Resize) {
+
+            Image(
+                bitmap = image,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+            )
+
             val minSize = 200
 
             ResizeHandle(Alignment.TopStart) { dx, dy ->
@@ -210,7 +246,52 @@ private fun Movable(
                 }
             }
         } else if (state == State.Crop) {
+            val density = LocalDensity.current.density
 
+
+            val cropZoneSize = remember {
+                Size(
+                    width = 250.times(density),
+                    height = 250.times(density)
+                )
+            }
+
+            var scale by remember {
+                mutableFloatStateOf(1f)
+            }
+
+            var transform by remember {
+                mutableStateOf(Offset(0f, 0f))
+            }
+
+            imageCrop = ImageCrop(bitmapImage = image.asAndroidBitmap())
+            imageCrop.ImageCropView(
+                modifier = Modifier.fillMaxSize(),
+                guideLineColor = Color.LightGray,
+                guideLineWidth = 2.dp,
+                edgeCircleSize = 5.dp,
+                edgeType = EdgeType.SQUARE
+            )
+
+
+            Button(
+                modifier = Modifier
+                    .height(60.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(start = 2.dp, end = 2.dp),
+                onClick = {
+                    val b = imageCrop.onCrop()
+                    image = b.asImageBitmap()
+                    imageCrop.resetView()
+                }
+            ) {
+                Text(
+                    text = "CropImage",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
         }
 //        //TODO FIX ALL ROUND
 //        Box(
@@ -229,6 +310,7 @@ private fun Movable(
 
     }
 }
+
 
 @Composable
 fun BoxScope.ResizeHandle(
