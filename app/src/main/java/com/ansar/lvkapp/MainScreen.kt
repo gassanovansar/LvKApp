@@ -37,9 +37,11 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -142,6 +144,8 @@ class MainScreen : Screen {
 
         val density = LocalDensity.current
 
+        var scale by remember { mutableStateOf(1f) }
+
         Box(
             modifier = Modifier
                 .size(with(density) { width.toDp() }, with(density) { height.toDp() })
@@ -149,15 +153,25 @@ class MainScreen : Screen {
                 .pointerInput(state) {
                     detectTransformGestures { _, pan, zoom, _ ->
                         if (state == State.Resize) {
-                            offsetX += pan.x
-                            offsetY += pan.y
+
+                            offsetX += pan.x //- if (zoom != 1F) width/2 else 0F
+                            offsetY += pan.y //- if (zoom != 1F) height/2 else 0F
+
                             width *= zoom
                             height *= zoom
+
+                            scale *= zoom
                         } else if (state == State.Crop) {
 
                         }
 
                     }
+                }
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    // трансформация от центра
+                    transformOrigin = TransformOrigin(0.5f, 0.5f)
                 }
         ) {
 
