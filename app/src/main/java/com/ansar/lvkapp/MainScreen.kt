@@ -61,7 +61,6 @@ import kotlin.math.roundToInt
 class MainScreen : Screen {
 
 
-
     @Composable
     override fun Content() {
         Box(
@@ -108,9 +107,6 @@ class MainScreen : Screen {
             )
 
 
-
-
-
 //            Movable(image = image1, state)
 //            Movable(image = image2, state)
 //            Movable(image = image3, state)
@@ -126,7 +122,7 @@ class MainScreen : Screen {
 
     enum class State {
         Resize,
-        Crop
+        Crop,
     }
 
 

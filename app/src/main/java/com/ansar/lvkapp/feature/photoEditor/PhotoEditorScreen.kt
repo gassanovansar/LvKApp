@@ -1,8 +1,10 @@
 package com.ansar.lvkapp.feature.photoEditor
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Switch
@@ -21,10 +23,11 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.core.screen.Screen
-import com.ansar.lvkapp.MainScreen
 import com.ansar.lvkapp.MainScreen.State
 import com.ansar.lvkapp.R
 import com.ansar.lvkapp.model.Image
@@ -54,7 +57,7 @@ class PhotoEditorScreen : Screen {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-
+            var viewState by remember { mutableStateOf(false) }
 
             Box(
                 Modifier
@@ -71,7 +74,9 @@ class PhotoEditorScreen : Screen {
                             .size(imageWidthDp, imageHeightDp)
                     ) {
                         list.forEach {
-
+                            var zIndex1 by remember(it.zIndex) {
+                                mutableStateOf(it.zIndex)
+                            }
                             var image by remember {
                                 mutableStateOf(
                                     ImageBitmap.imageResource(
@@ -81,22 +86,48 @@ class PhotoEditorScreen : Screen {
                                 )
                             }
                             var movableState by remember { mutableStateOf(State.Resize) }
-                            Switch(
-                                modifier = Modifier.align(Alignment.Center),
-                                checked = movableState == State.Resize,
-                                onCheckedChange = {
-                                    movableState = when (movableState) {
-                                        State.Resize -> State.Crop
-                                        State.Crop -> State.Resize
-                                    }
-                                }
-                            )
 
                             Movable(
-                                modifier = Modifier.align(Alignment.Center),
+                                modifier = Modifier
+                                    .zIndex(zIndex1),
                                 image = image,
-                                movableState
-                            )
+                                state = movableState,
+                                viewState = viewState,
+                                cropOnClick = {
+                                    movableState = State.Resize
+                                },
+                                changeState = {
+                                    movableState = State.Resize
+                                },
+                                content = {
+//                                    Switch(
+//                                        modifier = Modifier.align(Alignment.Center),
+//                                        checked = movableState == State.Resize,
+//                                        onCheckedChange = {
+//                                            movableState = when (movableState) {
+//                                                State.Resize -> State.Crop
+//                                                State.Crop -> State.Resize
+//                                            }
+//                                        }
+//                                    )
+                                    Image(
+                                        painter = painterResource(R.drawable.ic_setting_crop),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .clickable {
+                                                movableState = State.Crop
+                                            },
+                                        contentScale = ContentScale.FillBounds
+                                    )
+                                }
+                            ) {
+                                list = list.map { list ->
+                                    if (it.id == list.id) {
+                                        list.copy(zIndex = ++max)
+                                    } else list
+                                }
+                            }
 
 
                         }
@@ -119,6 +150,18 @@ class PhotoEditorScreen : Screen {
                     contentScale = ContentScale.Fit,
                 )
             }
+
+            Switch(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 30.dp),
+                checked = viewState,
+                onCheckedChange = {
+                    viewState = it
+                }
+            )
+
+
         }
 
 

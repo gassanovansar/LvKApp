@@ -1,7 +1,7 @@
 package com.ansar.lvkapp.movable
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
@@ -12,9 +12,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Divider
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,12 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -55,22 +54,29 @@ fun Movable(
     modifier: Modifier = Modifier,
     image: ImageBitmap,
     state: State,
-    cropOnClick: () -> Unit = {}
+    viewState: Boolean,
+    cropOnClick: () -> Unit = {},
+    changeState: (State) -> Unit = {},
+    content: @Composable BoxScope.() -> Unit = {},
+    onClick: () -> Unit = {}
 ) {
+    val res = LocalContext.current.resources
+
     var image by remember { mutableStateOf(image) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
 
-    var width by remember { mutableStateOf(200F) }
-    var height by remember { mutableStateOf(200F) }
+    var width by remember { mutableStateOf(800F) }
+    var height by remember { mutableStateOf(800F) }
 
 
     val density = LocalDensity.current
 
     var scale by remember { mutableStateOf(1f) }
 
+
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(with(density) { width.toDp() }, with(density) { height.toDp() })
             .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
             .pointerInput(state) {
@@ -96,123 +102,134 @@ fun Movable(
 //                // трансформация от центра
 //                transformOrigin = TransformOrigin(0.5f, 0.5f)
             }
+            .clickable {
+                onClick()
+            }
     ) {
 
 
         if (state == State.Resize) {
-
             Image(
                 bitmap = image,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds
             )
+            if (!viewState) {
+                val minSize = 200
 
-            val minSize = 200
-
-            ResizeHandle(Alignment.TopStart, ResizeType.TopLeft) { dx, dy ->
-                val newWidth = width - dx
-                val newHeight = height - dy
-                if (newWidth >= minSize) {
-                    offsetX += dx
-                    width = newWidth
+                ResizeHandle(Alignment.TopStart, ResizeType.TopLeft) { dx, dy ->
+                    val newWidth = width - dx
+                    val newHeight = height - dy
+                    if (newWidth >= minSize) {
+                        offsetX += dx
+                        width = newWidth
+                    }
+                    if (newHeight >= minSize) {
+                        offsetY += dy
+                        height = newHeight
+                    }
                 }
-                if (newHeight >= minSize) {
-                    offsetY += dy
-                    height = newHeight
+
+                // Top
+                ResizeHandle(Alignment.TopCenter, ResizeType.TopCenter) { _, dy ->
+                    val newHeight = height - dy
+                    if (newHeight >= minSize) {
+                        offsetY += dy
+                        height = newHeight
+                    }
                 }
-            }
 
-            // Top
-            ResizeHandle(Alignment.TopCenter, ResizeType.TopCenter) { _, dy ->
-                val newHeight = height - dy
-                if (newHeight >= minSize) {
-                    offsetY += dy
-                    height = newHeight
+                // Top-Right
+                ResizeHandle(Alignment.TopEnd, ResizeType.TopRight) { dx, dy ->
+                    val newWidth = width + dx
+                    val newHeight = height - dy
+                    if (newWidth >= minSize) width = newWidth
+                    if (newHeight >= minSize) {
+                        offsetY += dy
+                        height = newHeight
+                    }
                 }
-            }
 
-            // Top-Right
-            ResizeHandle(Alignment.TopEnd, ResizeType.TopRight) { dx, dy ->
-                val newWidth = width + dx
-                val newHeight = height - dy
-                if (newWidth >= minSize) width = newWidth
-                if (newHeight >= minSize) {
-                    offsetY += dy
-                    height = newHeight
+                // Right
+                ResizeHandle(Alignment.CenterEnd, ResizeType.RightCenter) { dx, _ ->
+                    val newWidth = width + dx
+                    if (newWidth >= minSize) width = newWidth
                 }
-            }
 
-            // Right
-            ResizeHandle(Alignment.CenterEnd, ResizeType.RightCenter) { dx, _ ->
-                val newWidth = width + dx
-                if (newWidth >= minSize) width = newWidth
-            }
-
-            // Bottom-Right
-            ResizeHandle(Alignment.BottomEnd, ResizeType.BottomRight) { dx, dy ->
-                val newWidth = width + dx
-                val newHeight = height + dy
-                if (newWidth >= minSize) width = newWidth
-                if (newHeight >= minSize) height = newHeight
-            }
-
-            // Bottom
-            ResizeHandle(Alignment.BottomCenter, ResizeType.BottomCenter) { _, dy ->
-                val newHeight = height + dy
-                if (newHeight >= minSize) height = newHeight
-            }
-
-            // Bottom-Left
-            ResizeHandle(Alignment.BottomStart, ResizeType.BottomLeft) { dx, dy ->
-                val newWidth = width - dx
-                val newHeight = height + dy
-                if (newWidth >= minSize) {
-                    offsetX += dx
-                    width = newWidth
+                // Bottom-Right
+                ResizeHandle(Alignment.BottomEnd, ResizeType.BottomRight) { dx, dy ->
+                    val newWidth = width + dx
+                    val newHeight = height + dy
+                    if (newWidth >= minSize) width = newWidth
+                    if (newHeight >= minSize) height = newHeight
                 }
-                if (newHeight >= minSize) height = newHeight
+
+                // Bottom
+                ResizeHandle(Alignment.BottomCenter, ResizeType.BottomCenter) { _, dy ->
+                    val newHeight = height + dy
+                    if (newHeight >= minSize) height = newHeight
+                }
+
+                // Bottom-Left
+                ResizeHandle(Alignment.BottomStart, ResizeType.BottomLeft) { dx, dy ->
+                    val newWidth = width - dx
+                    val newHeight = height + dy
+                    if (newWidth >= minSize) {
+                        offsetX += dx
+                        width = newWidth
+                    }
+                    if (newHeight >= minSize) height = newHeight
+                }
+
+                // Left
+                ResizeHandle(Alignment.CenterStart, ResizeType.LeftCenter) { dx, _ ->
+                    val newWidth = width - dx
+                    if (newWidth >= minSize) {
+                        offsetX += dx
+                        width = newWidth
+                    }
+                }
+                content()
             }
 
-            // Left
-            ResizeHandle(Alignment.CenterStart, ResizeType.LeftCenter) { dx, _ ->
-                val newWidth = width - dx
-                if (newWidth >= minSize) {
-                    offsetX += dx
-                    width = newWidth
-                }
-            }
+
         } else if (state == State.Crop) {
 
 
             imageCrop = ImageCrop(bitmapImage = image.asAndroidBitmap())
             imageCrop.ImageCropView(
                 modifier = Modifier.fillMaxSize(),
-                guideLineColor = Color.LightGray,
+                guideLineColor = if (viewState) Color.Transparent else Color.DarkGray,
                 guideLineWidth = 2.dp,
                 edgeCircleSize = 5.dp,
-                edgeType = EdgeType.SQUARE
+                edgeType = EdgeType.SQUARE,
             )
 
-
-            Button(
-                modifier = Modifier
-                    .height(60.dp)
-                    .align(Alignment.BottomCenter)
-                    .padding(start = 2.dp, end = 2.dp),
-                onClick = {
-                    val b = imageCrop.onCrop()
-                    image = b.asImageBitmap()
-                    imageCrop.resetView()
+            if (!viewState) {
+                Button(
+                    modifier = Modifier
+                        .height(60.dp)
+                        .align(Alignment.BottomCenter)
+                        .padding(start = 2.dp, end = 2.dp),
+                    onClick = {
+                        val b = imageCrop.onCrop()
+                        image = b.asImageBitmap()
+                        cropOnClick()
+                        imageCrop.resetView()
+                    }
+                ) {
+                    Text(
+                        text = "CropImage",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
-            ) {
-                Text(
-                    text = "CropImage",
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
+
+
         }
+
     }
 //        //TODO FIX ALL ROUND
 //        Box(
