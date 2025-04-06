@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import cafe.adriel.voyager.navigator.Navigator
+import com.ansar.lvkapp.feature.photoEditor.PhotoEditorScreen
 import com.ansar.lvkapp.ui.theme.LvKAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,7 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LvKAppTheme {
-                Navigator(screen = MainScreen())
+                Navigator(screen = PhotoEditorScreen())
             }
         }
     }
