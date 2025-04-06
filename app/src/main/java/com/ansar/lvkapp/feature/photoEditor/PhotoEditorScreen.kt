@@ -80,7 +80,7 @@ class PhotoEditorScreen : Screen {
                                     )
                                 )
                             }
-                            var movableState by remember { mutableStateOf(MainScreen.State.Resize) }
+                            var movableState by remember { mutableStateOf(State.Resize) }
                             Switch(
                                 modifier = Modifier.align(Alignment.Center),
                                 checked = movableState == State.Resize,
@@ -92,7 +92,11 @@ class PhotoEditorScreen : Screen {
                                 }
                             )
 
-                            Movable(image = image, movableState)
+                            Movable(
+                                modifier = Modifier.align(Alignment.Center),
+                                image = image,
+                                movableState
+                            )
 
 
                         }

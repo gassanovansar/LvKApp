@@ -111,9 +111,9 @@ class MainScreen : Screen {
 
 
 
-            Movable(image = image1, state)
-            Movable(image = image2, state)
-            Movable(image = image3, state)
+//            Movable(image = image1, state)
+//            Movable(image = image2, state)
+//            Movable(image = image3, state)
         }
     }
 
