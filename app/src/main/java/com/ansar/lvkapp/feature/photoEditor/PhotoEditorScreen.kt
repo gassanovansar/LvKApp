@@ -7,13 +7,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ExperimentalComposeApi
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -28,18 +34,32 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import com.ansar.lvkapp.MainScreen
 import com.ansar.lvkapp.MainScreen.State
 import com.ansar.lvkapp.R
 import com.ansar.lvkapp.model.Image
 import com.ansar.lvkapp.movable.Movable
+import dev.shreyaspatil.capturable.capturable
+import dev.shreyaspatil.capturable.controller.rememberCaptureController
+import kotlinx.coroutines.launch
 
 class PhotoEditorScreen : Screen {
+    @OptIn(ExperimentalComposeApi::class, ExperimentalComposeUiApi::class)
     @Composable
     override fun Content() {
         val res = LocalContext.current.resources
         var size by remember { mutableStateOf(IntSize.Zero) }
         var max by remember { mutableStateOf(3F) }
         val density = LocalDensity.current
+        val captureController = rememberCaptureController()
+        val uiScope = rememberCoroutineScope()
+        var ticketBitmap: ImageBitmap? by remember { mutableStateOf(null) }
+
+//        LaunchedEffect(Unit) {
+//            ticketBitmap = captureController.captureAsync().await()
+//        }
 
         var list by remember {
             mutableStateOf(
@@ -51,17 +71,48 @@ class PhotoEditorScreen : Screen {
             )
         }
 
-
-
-
+        ticketBitmap?.let { bitmap ->
+            val navigator = LocalNavigator.currentOrThrow
+            navigator.push(MainScreen())
+//                Dialog(onDismissRequest = { }) {
+//                    Column(
+//                        modifier = Modifier
+//                            .background(LightGray)
+//                            .padding(16.dp),
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        Text("Preview of Ticket image \uD83D\uDC47")
+//                        Spacer(Modifier.size(16.dp))
+//                        Image(
+//                            bitmap = bitmap,
+//                            contentDescription = "Preview of ticket"
+//                        )
+//                        Spacer(Modifier.size(4.dp))
+//                        Button(onClick = { ticketBitmap = null }) {
+//                            Text("Close Preview")
+//                        }
+//                    }
+//                }
+        }
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
             var viewState by remember { mutableStateOf(false) }
-
+            Button(
+                modifier = Modifier.padding(top = 20.dp),
+                onClick = {
+                    viewState = !true
+                    uiScope.launch {
+                        ticketBitmap = captureController.captureAsync().await()
+                    }
+                }
+            ) {
+                Text("Preview Ticket Image")
+            }
             Box(
                 Modifier
                     .align(Alignment.Center)
+                    .capturable(captureController)
                     .clip(RoundedCornerShape(28.dp))
             ) {
                 val imageWidthDp = with(density) { size.width.toDp() }
