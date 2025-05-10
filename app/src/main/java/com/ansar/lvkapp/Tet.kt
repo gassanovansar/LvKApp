@@ -167,61 +167,6 @@ fun DraggableResizableImage(
                     }
             )
 
-
-
-
-
-            // Левая ручка (по центру левого края)
-            Box(
-                Modifier
-                    .size(handleSize, handleSize)
-                    .align(Alignment.CenterStart)
-                    .background(Color.Green, CircleShape)
-                // .pointerInput(...) — логику crop добавим позже
-            )
-
-// Правая ручка (по центру правого края)
-            Box(
-                Modifier
-                    .size(handleSize, handleSize)
-                    .align(Alignment.CenterEnd)
-                    .background(Color.Green, CircleShape)
-                // .pointerInput(...) — логику crop добавим позже
-            )
-
-// Верхняя ручка (по центру верхнего края)
-            Box(
-                Modifier
-                    .size(handleSize, handleSize)
-                    .align(Alignment.TopCenter)
-                    .background(Color.Green, CircleShape)
-                // .pointerInput(...) — логику crop добавим позже
-            )
-
-// Нижняя ручка (по центру нижнего края)
-            Box(
-                Modifier
-                    .size(handleSize, handleSize)
-                    .align(Alignment.BottomCenter)
-                    .background(Color.Green, CircleShape)
-                // .pointerInput(...) — логику crop добавим позже
-            )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         }
     }
 }
