@@ -60,19 +60,18 @@ fun ImageCropper(
     // Для отображения в dp
     val boxWidthDp = with(density) { imageWidth.toDp() }
     val boxHeightDp = with(density) { imageHeight.toDp() }
-
+    // Само изображение
+    Image(
+        bitmap = bitmap.asImageBitmap(),
+        contentDescription = null,
+        modifier = Modifier.size(boxWidthDp, boxHeightDp),
+        contentScale = ContentScale.FillBounds
+    )
     Box(
         modifier = modifier
             .size(boxWidthDp, boxHeightDp)
             .background(Color.Black)
     ) {
-        // Само изображение
-        Image(
-            bitmap = bitmap.asImageBitmap(),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
-        )
 
         // Crop-рамка
         Box(

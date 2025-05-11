@@ -52,121 +52,121 @@ fun DraggableResizableImage(
     val minSize = 48.dp
     val handleSize = 24.dp
     val handleColor = Color.Blue
-    val sensitivity = 3.5f // или даже 4.0f
+    val sensitivity = 2.0f // или даже 4.0f
 
+
+    Image(
+        painter = painterResource(id = imageRes),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        modifier = Modifier
+            .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
+            .size(width, height)
+    )
     Box(
-        modifier = modifier.fillMaxSize()
-    ) {
-        Box(
-            modifier = Modifier
-                .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
-                .size(width, height)
-                .border(2.dp, Color.Gray)
-        ) {
-            // Перемещение только по картинке!
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, dragAmount ->
-                            change.consume()
-                            offset += dragAmount
-                        }
-                    }
-            )
-
-            fun resizeProportional(
-                dragAmount: Offset,
-                fixLeft: Boolean,
-                fixTop: Boolean
-            ) {
-                // Для каждого угла направление должно быть разным:
-                val deltaPx = when {
-                    // TopLeft: тянем влево-вверх — увеличиваем, вправо-вниз — уменьшаем
-                    fixLeft && fixTop -> -(dragAmount.x + dragAmount.y)
-                    // TopRight: тянем вправо-вверх — увеличиваем, влево-вниз — уменьшаем
-                    !fixLeft && fixTop -> dragAmount.x - dragAmount.y
-                    // BottomLeft: тянем влево-вниз — увеличиваем, вправо-вверх — уменьшаем
-                    fixLeft && !fixTop -> -dragAmount.x + dragAmount.y
-                    // BottomRight: тянем вправо-вниз — увеличиваем, влево-вверх — уменьшаем
-                    else -> dragAmount.x + dragAmount.y
-                } / sensitivity
-
-                val widthPx = with(density) { width.toPx() }
-                val heightPx = with(density) { height.toPx() }
-                val minPx = with(density) { minSize.toPx() }
-
-                val newWidthPx = (widthPx + deltaPx).coerceAtLeast(minPx)
-                val newHeightPx = newWidthPx / aspectRatio
-
-                val widthDiffPx = newWidthPx - widthPx
-                val heightDiffPx = newHeightPx - heightPx
-
-                val newOffset = offset.copy(
-                    x = offset.x - if (fixLeft) widthDiffPx else 0f,
-                    y = offset.y - if (fixTop) heightDiffPx else 0f
-                )
-                offset = newOffset
-                width = with(density) { newWidthPx.toDp() }
-                height = with(density) { newHeightPx.toDp() }
+        modifier = Modifier
+            .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
+            .size(width, height)
+            .border(2.dp, Color.Gray)
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+                    offset += dragAmount
+                }
             }
+    ) {
+        // Перемещение только по картинке!
 
-            // Top-Left (фиксируем левую и верхнюю стороны)
-            Box(
-                Modifier
-                    .size(handleSize)
-                    .align(Alignment.TopStart)
-                    .background(handleColor, CircleShape)
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, dragAmount ->
-                            change.consume()
-                            resizeProportional(dragAmount, fixLeft = true, fixTop = true)
-                        }
-                    }
-            )
-// Top-Right (фиксируем правую и верхнюю стороны)
-            Box(
-                Modifier
-                    .size(handleSize)
-                    .align(Alignment.TopEnd)
-                    .background(handleColor, CircleShape)
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, dragAmount ->
-                            change.consume()
-                            resizeProportional(dragAmount, fixLeft = false, fixTop = true)
-                        }
-                    }
-            )
-// Bottom-Left (фиксируем левую и нижнюю стороны)
-            Box(
-                Modifier
-                    .size(handleSize)
-                    .align(Alignment.BottomStart)
-                    .background(handleColor, CircleShape)
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, dragAmount ->
-                            change.consume()
-                            resizeProportional(dragAmount, fixLeft = true, fixTop = false)
-                        }
-                    }
-            )
-// Bottom-Right (фиксируем правую и нижнюю стороны)
-            Box(
-                Modifier
-                    .size(handleSize)
-                    .align(Alignment.BottomEnd)
-                    .background(handleColor, CircleShape)
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, dragAmount ->
-                            change.consume()
-                            resizeProportional(dragAmount, fixLeft = false, fixTop = false)
-                        }
-                    }
-            )
 
+        fun resizeProportional(
+            dragAmount: Offset,
+            fixLeft: Boolean,
+            fixTop: Boolean
+        ) {
+            // Для каждого угла направление должно быть разным:
+            val deltaPx = when {
+                // TopLeft: тянем влево-вверх — увеличиваем, вправо-вниз — уменьшаем
+                fixLeft && fixTop -> -(dragAmount.x + dragAmount.y)
+                // TopRight: тянем вправо-вверх — увеличиваем, влево-вниз — уменьшаем
+                !fixLeft && fixTop -> dragAmount.x - dragAmount.y
+                // BottomLeft: тянем влево-вниз — увеличиваем, вправо-вверх — уменьшаем
+                fixLeft && !fixTop -> -dragAmount.x + dragAmount.y
+                // BottomRight: тянем вправо-вниз — увеличиваем, влево-вверх — уменьшаем
+                else -> dragAmount.x + dragAmount.y
+            } / sensitivity
+
+            val widthPx = with(density) { width.toPx() }
+            val heightPx = with(density) { height.toPx() }
+            val minPx = with(density) { minSize.toPx() }
+
+            val newWidthPx = (widthPx + deltaPx).coerceAtLeast(minPx)
+            val newHeightPx = newWidthPx / aspectRatio
+
+            val widthDiffPx = newWidthPx - widthPx
+            val heightDiffPx = newHeightPx - heightPx
+
+            val newOffset = offset.copy(
+                x = offset.x - if (fixLeft) widthDiffPx else 0f,
+                y = offset.y - if (fixTop) heightDiffPx else 0f
+            )
+            offset = newOffset
+            width = with(density) { newWidthPx.toDp() }
+            height = with(density) { newHeightPx.toDp() }
         }
+
+        // Top-Left (фиксируем левую и верхнюю стороны)
+        Box(
+            Modifier
+                .size(handleSize)
+                .align(Alignment.TopStart)
+                .background(handleColor, CircleShape)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        resizeProportional(dragAmount, fixLeft = true, fixTop = true)
+                    }
+                }
+        )
+// Top-Right (фиксируем правую и верхнюю стороны)
+        Box(
+            Modifier
+                .size(handleSize)
+                .align(Alignment.TopEnd)
+                .background(handleColor, CircleShape)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        resizeProportional(dragAmount, fixLeft = false, fixTop = true)
+                    }
+                }
+        )
+// Bottom-Left (фиксируем левую и нижнюю стороны)
+        Box(
+            Modifier
+                .size(handleSize)
+                .align(Alignment.BottomStart)
+                .background(handleColor, CircleShape)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        resizeProportional(dragAmount, fixLeft = true, fixTop = false)
+                    }
+                }
+        )
+// Bottom-Right (фиксируем правую и нижнюю стороны)
+        Box(
+            Modifier
+                .size(handleSize)
+                .align(Alignment.BottomEnd)
+                .background(handleColor, CircleShape)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        change.consume()
+                        resizeProportional(dragAmount, fixLeft = false, fixTop = false)
+                    }
+                }
+        )
+
     }
+
 }
