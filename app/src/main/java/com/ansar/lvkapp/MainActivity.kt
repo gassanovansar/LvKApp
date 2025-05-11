@@ -1,6 +1,7 @@
 package com.ansar.lvkapp
 
 import DraggableResizableImage
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -86,7 +88,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                 ) {
-                    DraggableResizableImage(
+                    ImageCropper(
                         imageRes = R.drawable.landscape2,
                     )
                 }
