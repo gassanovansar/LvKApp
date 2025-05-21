@@ -1,10 +1,12 @@
 package com.ansar.lvkapp
 
+import DraggableResizableImage
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,11 +14,16 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -28,12 +35,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -74,76 +87,100 @@ class MainActivity : ComponentActivity() {
 //                    }
 ////                    NotificationContainer()
 //                }
-                Box {
-                    CaseEditor(
-                        caseBackgroundRes = R.drawable.ic_user,
-                        overlayImageRes = R.drawable.landscape3
-                    )
-                }
-
+//                Box(
+//                    modifier = Modifier
+//                        .requiredWidth(1000.dp)
+//                        .requiredHeight(1000.dp)
+//                ) {
+//                    CaseEditor()
+////                    DraggableResizableImage(R.drawable.landscape3)
+//                }
+                ImageWithCutoutOverlay()
 
             }
-
 
         }
     }
 }
 
 @Composable
-fun CaseEditor(
-    caseBackgroundRes: Int,
-    overlayImageRes: Int
-) {
-
-    val scope = rememberCoroutineScope()
+fun ImageWithCutoutOverlay() {
     val context = LocalContext.current
-    val caseBitmap = remember { BitmapFactory.decodeResource(context.resources, caseBackgroundRes) }
-    val overlayBitmap =
-        remember { BitmapFactory.decodeResource(context.resources, overlayImageRes) }
     val density = LocalDensity.current
-    var offset by remember { mutableStateOf(Offset(0f, 0f)) }
-    var scale by remember { mutableStateOf(1f) }
-    var rotation by remember { mutableStateOf(0f) }
+    val originalSize = remember(R.drawable.ic_user) {
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeResource(context.resources, R.drawable.ic_user, options)
+        options.outWidth to options.outHeight
+    }
     Box(
-        Modifier
+        modifier = Modifier
+            .requiredWidth(1000.dp)
+            .requiredHeight(1000.dp)
     ) {
+        DraggableResizableImage(R.drawable.landscape3)
+
+        // Центрированное изображение
         Box(
-            Modifier
-                .aspectRatio(caseBitmap.width.toFloat() / caseBitmap.height)
+            modifier = Modifier
+                .align(Alignment.Center)
         ) {
             Image(
-                bitmap = overlayBitmap.asImageBitmap(),
+                painter = painterResource(id = R.drawable.ic_user),
                 contentDescription = null,
-                modifier = Modifier
-                    .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
-                    .graphicsLayer(
-                        scaleX = scale,
-                        scaleY = scale,
-                        rotationZ = rotation
-                    )
-                    // Затем scale/rotate (только pinch/rotate, без pan)
-                    .pointerInput(Unit) {
-                        scope.launch {
-                            detectTransformGestures(
-                                onGesture = { _, pan, zoom, rot ->
-                                    offset += pan * scale
-                                    scale = (scale * zoom).coerceIn(0.2f, 5f)
-                                    rotation += rot
-                                }
-                            )
-                        }
-
-                    }
             )
         }
 
+        // Тёмный фон с "вырезом" в центре
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    compositingStrategy = CompositingStrategy.Offscreen // важный момент!
+                }
+                .drawWithContent {
+                    drawContent() // нарисовать фон
+                    val canvasWidth = size.width
+                    val canvasHeight = size.height
 
+                    val imageWidth = originalSize.first
+                        .toDp()
+                        .toPx()
+                    val imageHeight = originalSize.second
+                        .toDp()
+                        .toPx()
 
-        Image(
-            bitmap = caseBitmap.asImageBitmap(),
-            contentDescription = null,
-            modifier = Modifier.align(Alignment.Center)
+                    val imageLeft = (canvasWidth - imageWidth) / 2f
+                    val imageTop = (canvasHeight - imageHeight) / 2f
+
+                    // Нарисовать тёмный прямоугольник
+                    drawRect(color = Color.Black)
+
+                    // Вырезать "окно" в центре под изображение
+                    val cornerRadiusPx = with(density) { 28.dp.toPx() }
+                    drawRoundRect(
+                        color = Color.Transparent,
+                        topLeft = Offset(imageLeft, imageTop),
+                        size = Size(imageWidth, imageHeight),
+                        cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
+                        blendMode = BlendMode.Clear
+                    )
+                }
         )
+
+    }
+}
+
+
+@Composable
+fun CaseEditor(
+
+) {
+    Box(
+        Modifier.fillMaxSize()
+    ) {
+        DraggableResizableImage(R.drawable.landscape3)
+
+
     }
 }
 

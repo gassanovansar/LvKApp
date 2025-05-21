@@ -41,7 +41,7 @@ fun DraggableResizableImage(
         } else 1f
     }
 
-    var offset by remember { mutableStateOf(Offset(0f, 0f)) }
+    var offset by remember { mutableStateOf(Offset(880f, 850f)) }
     var width by remember {
         mutableStateOf(with(density) { originalSize.first.toDp() })
     }
@@ -59,12 +59,14 @@ fun DraggableResizableImage(
         painter = painterResource(id = imageRes),
         contentDescription = null,
         contentScale = ContentScale.FillBounds,
-        modifier = Modifier
-            .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
+        modifier = modifier
+            .offset {
+                IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
+            }
             .size(width, height)
     )
     Box(
-        modifier = Modifier
+        modifier = modifier
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
             .size(width, height)
             .border(2.dp, Color.Gray)
