@@ -22,17 +22,16 @@ import kotlin.math.roundToInt
 @Composable
 fun DraggableResizableImage(
     imageRes: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    original: Pair<Int, Int>,
+    resultOffset: (Offset) -> Unit,
+    resultSize: (Dp, Dp) -> Unit,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
 
     // Получаем оригинальный размер изображения (в px)
-    val originalSize = remember(imageRes) {
-        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        BitmapFactory.decodeResource(context.resources, imageRes, options)
-        options.outWidth to options.outHeight
-    }
+    val originalSize = remember(original) { original }
 
     // Сохраняем исходное соотношение сторон
     val aspectRatio = remember(originalSize) {
@@ -40,7 +39,6 @@ fun DraggableResizableImage(
             originalSize.first.toFloat() / originalSize.second.toFloat()
         } else 1f
     }
-
     var offset by remember { mutableStateOf(Offset(880f, 850f)) }
     var width by remember {
         mutableStateOf(with(density) { originalSize.first.toDp() })
@@ -55,16 +53,16 @@ fun DraggableResizableImage(
     val sensitivity = 2.0f // или даже 4.0f
 
 
-    Image(
-        painter = painterResource(id = imageRes),
-        contentDescription = null,
-        contentScale = ContentScale.FillBounds,
-        modifier = modifier
-            .offset {
-                IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
-            }
-            .size(width, height)
-    )
+//    Image(
+//        painter = painterResource(id = imageRes),
+//        contentDescription = null,
+//        contentScale = ContentScale.FillBounds,
+//        modifier = modifier
+//            .offset {
+//                IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
+//            }
+//            .size(width, height)
+//    )
     Box(
         modifier = modifier
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
@@ -74,6 +72,7 @@ fun DraggableResizableImage(
                 detectDragGestures { change, dragAmount ->
                     change.consume()
                     offset += dragAmount
+                    resultOffset(offset)
                 }
             }
     ) {
@@ -112,8 +111,10 @@ fun DraggableResizableImage(
                 y = offset.y - if (fixTop) heightDiffPx else 0f
             )
             offset = newOffset
+            resultOffset(offset)
             width = with(density) { newWidthPx.toDp() }
             height = with(density) { newHeightPx.toDp() }
+            resultSize(width, height)
         }
 
         // Top-Left (фиксируем левую и верхнюю стороны)

@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +47,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
@@ -59,6 +61,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.bottomSheet.BottomSheetNavigator
 import com.ansar.lvkapp.feature.photoEditor.PhotoEditorNew
 import com.ansar.lvkapp.uiKit.theme.AppTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -95,7 +98,7 @@ class MainActivity : ComponentActivity() {
 //                    CaseEditor()
 ////                    DraggableResizableImage(R.drawable.landscape3)
 //                }
-                ImageWithCutoutOverlay()
+                ImageWithCutoutOverlay(listOf(ImageState(id = 1, R.drawable.landscape2)))
 
             }
 
@@ -103,8 +106,16 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+data class ImageState(
+    val id: Int,
+    val image: Int,
+    val offset: Offset = Offset(880f, 850f),
+    val width: Dp = 0.dp,
+    val height: Dp = 0.dp
+)
+
 @Composable
-fun ImageWithCutoutOverlay() {
+fun ImageWithCutoutOverlay(ic: List<ImageState>) {
     val context = LocalContext.current
     val density = LocalDensity.current
     val originalSize = remember(R.drawable.ic_user) {
@@ -112,12 +123,16 @@ fun ImageWithCutoutOverlay() {
         BitmapFactory.decodeResource(context.resources, R.drawable.ic_user, options)
         options.outWidth to options.outHeight
     }
+    var isVisible by remember { mutableStateOf(true) }
+    val state by remember(ic) { mutableStateOf(ic) }
+
+
     Box(
         modifier = Modifier
             .requiredWidth(1000.dp)
             .requiredHeight(1000.dp)
     ) {
-        DraggableResizableImage(R.drawable.landscape3)
+
 
         // Центрированное изображение
         Box(
@@ -129,7 +144,26 @@ fun ImageWithCutoutOverlay() {
                 contentDescription = null,
             )
         }
-
+        state.forEach {
+            val imageRes = remember(it.image) {
+                val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                BitmapFactory.decodeResource(context.resources, it.image, options)
+                options.outWidth to options.outHeight
+            }
+            var offset by remember { mutableStateOf(Offset(880f, 850f)) }
+            var width by remember { mutableStateOf(with(density) { imageRes.first.toDp() }) }
+            var height by remember { mutableStateOf(with(density) { imageRes.second.toDp() }) }
+            Image(
+                painter = painterResource(id = R.drawable.landscape3),
+                contentDescription = null,
+                contentScale = ContentScale.FillBounds,
+                modifier = Modifier
+                    .offset {
+                        IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
+                    }
+                    .size(width, height)
+            )
+        }
         // Тёмный фон с "вырезом" в центре
         Box(
             modifier = Modifier
@@ -166,6 +200,18 @@ fun ImageWithCutoutOverlay() {
                     )
                 }
         )
+        if (isVisible) {
+//            ic.forEach {
+//                DraggableResizableImage(it, original = imageRes, resultOffset = {
+//                    offset = it
+//                }) { w, h ->
+//                    width = w
+//                    height = h
+//                }
+//            }
+
+        }
+
 
     }
 }
@@ -178,7 +224,7 @@ fun CaseEditor(
     Box(
         Modifier.fillMaxSize()
     ) {
-        DraggableResizableImage(R.drawable.landscape3)
+//        DraggableResizableImage(R.drawable.landscape3)
 
 
     }

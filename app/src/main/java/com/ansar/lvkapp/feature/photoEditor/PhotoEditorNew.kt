@@ -77,9 +77,9 @@ class PhotoEditorNew : Screen {
                 Box(
                     Modifier.clipToBounds().size(imageWidthDp,imageHeightDp)
                 ) {
-                    DraggableResizableImage(
-                        imageRes = R.drawable.landscape2,
-                    )
+//                    DraggableResizableImage(
+//                        imageRes = R.drawable.landscape2,
+//                    )
                 }
                 Image(
                     modifier = Modifier
