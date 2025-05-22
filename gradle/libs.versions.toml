@@ -10,6 +10,8 @@ activityCompose = "1.10.1"
 composeBom = "2024.04.01"
 capturable = "2.1.0"
 
+orbit-core = "6.0.0"
+koin = "3.5.3"
 
 
 voyager = "1.0.0"
@@ -38,7 +40,8 @@ voyager-bottomSheetNavigator = { module = "cafe.adriel.voyager:voyager-bottom-sh
 voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 voyager-screenModel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
 
-
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+orbit-core = { group = "org.orbit-mvi", name = "orbit-core", version.ref = "orbit-core" }
 
 
 capturable = { module = "dev.shreyaspatil:capturable", version.ref = "capturable" }

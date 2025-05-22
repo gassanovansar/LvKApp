@@ -1,32 +1,37 @@
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.*
-import kotlin.math.abs
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
 @Composable
 fun DraggableResizableImage(
-    imageRes: Int,
+    id: Int,
     modifier: Modifier = Modifier,
     original: Pair<Int, Int>,
-    resultOffset: (Offset) -> Unit,
-    resultSize: (Dp, Dp) -> Unit,
-) {
+    zIndex: Int,
+    resultOffset: (Offset, Dp, Dp, Boolean) -> Unit,
+
+    ) {
     val context = LocalContext.current
     val density = LocalDensity.current
 
@@ -49,7 +54,6 @@ fun DraggableResizableImage(
 
     val minSize = 48.dp
     val handleSize = 24.dp
-    val handleColor = Color.Blue
     val sensitivity = 2.0f // или даже 4.0f
 
 
@@ -63,22 +67,28 @@ fun DraggableResizableImage(
 //            }
 //            .size(width, height)
 //    )
+    var border by remember { mutableStateOf(false) }
+    LaunchedEffect(zIndex) {
+        border = zIndex == id
+        println("zIndex")
+    }
     Box(
         modifier = modifier
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
             .size(width, height)
-            .border(2.dp, Color.Gray)
+            .border(2.dp, if (border) Color.Gray else Color.Transparent)
             .pointerInput(Unit) {
-                detectDragGestures { change, dragAmount ->
+                detectDragGestures(onDragStart = { startOffset ->
+                    resultOffset(offset, width, height, true)
+                }) { change, dragAmount ->
                     change.consume()
                     offset += dragAmount
-                    resultOffset(offset)
+                    resultOffset(offset, width, height, false)
                 }
             }
+
     ) {
         // Перемещение только по картинке!
-
-
         fun resizeProportional(
             dragAmount: Offset,
             fixLeft: Boolean,
@@ -111,10 +121,9 @@ fun DraggableResizableImage(
                 y = offset.y - if (fixTop) heightDiffPx else 0f
             )
             offset = newOffset
-            resultOffset(offset)
             width = with(density) { newWidthPx.toDp() }
             height = with(density) { newHeightPx.toDp() }
-            resultSize(width, height)
+            resultOffset(offset, width, height, false)
         }
 
         // Top-Left (фиксируем левую и верхнюю стороны)
@@ -122,7 +131,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.TopStart)
-                .background(handleColor, CircleShape)
+                .background(Color.Red, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -135,7 +144,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.TopEnd)
-                .background(handleColor, CircleShape)
+                .background(Color.Red, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -148,7 +157,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.BottomStart)
-                .background(handleColor, CircleShape)
+                .background(Color.Red, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -161,7 +170,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.BottomEnd)
-                .background(handleColor, CircleShape)
+                .background(Color.Red, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()

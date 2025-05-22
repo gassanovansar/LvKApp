@@ -74,22 +74,22 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppTheme {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .background(Color.White)
-//                ) {
-//                    BottomSheetNavigator(
-//                        sheetShape = RoundedCornerShape(
-//                            topStartPercent = 8,
-//                            topEndPercent = 8
-//                        )
-//                    ) {
-//                        Navigator(PhotoEditorNew())
-////                DebugView()
-//                    }
-////                    NotificationContainer()
-//                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                ) {
+                    BottomSheetNavigator(
+                        sheetShape = RoundedCornerShape(
+                            topStartPercent = 8,
+                            topEndPercent = 8
+                        )
+                    ) {
+                        Navigator(Screem())
+//                DebugView()
+                    }
+//                    NotificationContainer()
+                }
 //                Box(
 //                    modifier = Modifier
 //                        .requiredWidth(1000.dp)
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
 //                    CaseEditor()
 ////                    DraggableResizableImage(R.drawable.landscape3)
 //                }
-                ImageWithCutoutOverlay(listOf(ImageState(id = 1, R.drawable.landscape2)))
+//                ImageWithCutoutOverlay(ImageState(id = 1, R.drawable.landscape2))
 
             }
 
@@ -109,13 +109,14 @@ class MainActivity : ComponentActivity() {
 data class ImageState(
     val id: Int,
     val image: Int,
+    val original: Pair<Int, Int> = Pair(0, 0),
     val offset: Offset = Offset(880f, 850f),
     val width: Dp = 0.dp,
-    val height: Dp = 0.dp
+    val height: Dp = 0.dp,
 )
 
 @Composable
-fun ImageWithCutoutOverlay(ic: List<ImageState>) {
+fun ImageWithCutoutOverlay(it: ImageState) {
     val context = LocalContext.current
     val density = LocalDensity.current
     val originalSize = remember(R.drawable.ic_user) {
@@ -124,7 +125,6 @@ fun ImageWithCutoutOverlay(ic: List<ImageState>) {
         options.outWidth to options.outHeight
     }
     var isVisible by remember { mutableStateOf(true) }
-    val state by remember(ic) { mutableStateOf(ic) }
 
 
     Box(
@@ -133,7 +133,24 @@ fun ImageWithCutoutOverlay(ic: List<ImageState>) {
             .requiredHeight(1000.dp)
     ) {
 
-
+        val imageRes = remember(it.image) {
+            val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeResource(context.resources, it.image, options)
+            options.outWidth to options.outHeight
+        }
+        var offset by remember { mutableStateOf(Offset(880f, 850f)) }
+        var width by remember { mutableStateOf(with(density) { imageRes.first.toDp() }) }
+        var height by remember { mutableStateOf(with(density) { imageRes.second.toDp() }) }
+        Image(
+            painter = painterResource(id = R.drawable.landscape3),
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .offset {
+                    IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
+                }
+                .size(width, height)
+        )
         // Центрированное изображение
         Box(
             modifier = Modifier
@@ -144,26 +161,7 @@ fun ImageWithCutoutOverlay(ic: List<ImageState>) {
                 contentDescription = null,
             )
         }
-        state.forEach {
-            val imageRes = remember(it.image) {
-                val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-                BitmapFactory.decodeResource(context.resources, it.image, options)
-                options.outWidth to options.outHeight
-            }
-            var offset by remember { mutableStateOf(Offset(880f, 850f)) }
-            var width by remember { mutableStateOf(with(density) { imageRes.first.toDp() }) }
-            var height by remember { mutableStateOf(with(density) { imageRes.second.toDp() }) }
-            Image(
-                painter = painterResource(id = R.drawable.landscape3),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .offset {
-                        IntOffset(offset.x.roundToInt(), offset.y.roundToInt())
-                    }
-                    .size(width, height)
-            )
-        }
+
         // Тёмный фон с "вырезом" в центре
         Box(
             modifier = Modifier
@@ -202,12 +200,12 @@ fun ImageWithCutoutOverlay(ic: List<ImageState>) {
         )
         if (isVisible) {
 //            ic.forEach {
-//                DraggableResizableImage(it, original = imageRes, resultOffset = {
-//                    offset = it
-//                }) { w, h ->
-//                    width = w
-//                    height = h
-//                }
+//            DraggableResizableImage(it.image, original = imageRes, resultOffset = {
+//                offset = it
+//            }) { w, h ->
+//                width = w
+//                height = h
+//            }
 //            }
 
         }
