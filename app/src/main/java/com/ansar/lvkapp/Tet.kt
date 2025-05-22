@@ -125,7 +125,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.TopStart)
-                .background(Color.Red, CircleShape)
+                .background(if (border) Color.Gray else Color.Transparent, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -138,7 +138,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.TopEnd)
-                .background(Color.Red, CircleShape)
+                .background(if (border) Color.Gray else Color.Transparent, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -151,7 +151,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.BottomStart)
-                .background(Color.Red, CircleShape)
+                .background(if (border) Color.Gray else Color.Transparent, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()
@@ -164,7 +164,7 @@ fun DraggableResizableImage(
             Modifier
                 .size(handleSize)
                 .align(Alignment.BottomEnd)
-                .background(Color.Red, CircleShape)
+                .background(if (border) Color.Gray else Color.Transparent, CircleShape)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         change.consume()

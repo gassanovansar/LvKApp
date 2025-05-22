@@ -162,12 +162,12 @@ class Screem : Screen {
             if (isVisible) {
 
 
-                state.images.forEach {
+                state.images.forEachIndexed { i, it ->
 //                    id = it.id,
 //                    zIndex = state.zIndex,
                     DraggableResizableImage(
                         original = it.original,
-                        border = state.zIndex == it.id,
+                        border = state.images.lastIndex == i,
                         resultOffset = { offset, w, h, z ->
                             onChange(
                                 it.copy(
