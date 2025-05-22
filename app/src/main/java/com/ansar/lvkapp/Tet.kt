@@ -1,6 +1,11 @@
 import android.view.MotionEvent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
@@ -27,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun DraggableResizableImage(
     modifier: Modifier = Modifier,
@@ -72,15 +77,19 @@ fun DraggableResizableImage(
             .zIndex(if (border) 1F else 0F)
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
             .size(width, height)
-            .border(2.dp, if (border) Color.Gray else Color.Transparent)
-            .pointerInteropFilter { motionEvent ->
-                when (motionEvent.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        resultOffset(offset, width, height, true)
-                    }
-                }
-                border // возвращаем true, чтобы событие считалось обработанным
-            }
+            .border(2.dp, if (border) Color.Gray else Color.Transparent).combinedClickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            onClick = { resultOffset(offset, width, height, true)  }
+        )
+//            .pointerInteropFilter { motionEvent ->
+//                when (motionEvent.action) {
+//                    MotionEvent.ACTION_DOWN -> {
+//                        resultOffset(offset, width, height, true)
+//                    }
+//                }
+//                !border // возвращаем true, чтобы событие считалось обработанным
+//            }
 
             .pointerInput(Unit) {
                 detectDragGestures(onDragStart = { startOffset ->
