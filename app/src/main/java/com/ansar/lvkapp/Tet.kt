@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import kotlin.math.roundToInt
 
 @Composable
@@ -68,6 +69,7 @@ fun DraggableResizableImage(
 //    )
     Box(
         modifier = modifier
+            .zIndex(if (border) 1F else 0F)
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }
             .size(width, height)
             .border(2.dp, if (border) Color.Gray else Color.Transparent)

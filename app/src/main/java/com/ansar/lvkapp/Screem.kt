@@ -167,7 +167,8 @@ class Screem : Screen {
 //                    zIndex = state.zIndex,
                     DraggableResizableImage(
                         original = it.original,
-                        border = state.images.lastIndex == i,
+//                        border = i == 0,
+                        border = state.zIndex == it.id,
                         resultOffset = { offset, w, h, z ->
                             onChange(
                                 it.copy(
