@@ -6,6 +6,6 @@ data class MainActivityState(
     val selectedId: Int
 ) {
     companion object {
-        val Default = MainActivityState(emptyList(), 0, -1)
+        val Default = MainActivityState(emptyList(),0, -1)
     }
 }

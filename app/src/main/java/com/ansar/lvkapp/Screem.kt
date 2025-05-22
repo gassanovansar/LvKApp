@@ -162,7 +162,7 @@ class Screem : Screen {
             if (isVisible) {
 
 
-                state.images.forEachIndexed { i, it ->
+                state.images.sortedBy { it.id }.forEachIndexed { i, it ->
 //                    id = it.id,
 //                    zIndex = state.zIndex,
                     DraggableResizableImage(

@@ -54,7 +54,7 @@ class MainActivityScreenModel :
             val list = state.images.filter { it.id != imageState.id } + listOf(imageState)
             reduce {
                 state.copy(
-//                    images = list,
+                    images = list,
                     zIndex = imageState.id,
                     selectedId = id
                 )
