@@ -3,7 +3,6 @@ package com.ansar.lvkapp
 import DraggableResizableImage
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -33,7 +32,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import kotlinx.coroutines.launch
@@ -95,9 +93,9 @@ class Screem : Screen {
                 .requiredHeight(1000.dp)
         ) {
             state.images.forEach {
-                var offset by remember(it.offset) { mutableStateOf(it.offset) }
-                var width by remember(it.width) { mutableStateOf(it.width) }
-                var height by remember(it.height) { mutableStateOf(it.height) }
+                val offset by remember(it.offset) { mutableStateOf(it.offset) }
+                val width by remember(it.width) { mutableStateOf(it.width) }
+                val height by remember(it.height) { mutableStateOf(it.height) }
                 Image(
                     painter = painterResource(id = it.image),
                     contentDescription = null,
