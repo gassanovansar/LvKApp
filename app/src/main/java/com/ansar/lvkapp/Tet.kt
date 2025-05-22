@@ -25,10 +25,9 @@ import kotlin.math.roundToInt
 
 @Composable
 fun DraggableResizableImage(
-    id: Int,
     modifier: Modifier = Modifier,
     original: Pair<Int, Int>,
-    zIndex: Int,
+    border : Boolean,
     resultOffset: (Offset, Dp, Dp, Boolean) -> Unit,
 
     ) {
@@ -67,11 +66,6 @@ fun DraggableResizableImage(
 //            }
 //            .size(width, height)
 //    )
-    var border by remember { mutableStateOf(false) }
-    LaunchedEffect(zIndex) {
-        border = zIndex == id
-        println("zIndex")
-    }
     Box(
         modifier = modifier
             .offset { IntOffset(offset.x.roundToInt(), offset.y.roundToInt()) }

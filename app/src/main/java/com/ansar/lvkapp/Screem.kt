@@ -50,8 +50,8 @@ class Screem : Screen {
         if (isVisible) {
             ImageWithCutoutOverlay(
                 state
-            ) { it, z ->
-                screenModel.changeImages(it, z)
+            ) { it, z, id ->
+                screenModel.changeImages(it, z, id)
             }
         }
 
@@ -78,7 +78,7 @@ class Screem : Screen {
     @Composable
     fun ImageWithCutoutOverlay(
         state: MainActivityState,
-        onChange: (ImageState, Boolean) -> Unit
+        onChange: (ImageState, Boolean, Int) -> Unit
     ) {
         val context = LocalContext.current
         val density = LocalDensity.current
@@ -94,7 +94,7 @@ class Screem : Screen {
                 .requiredWidth(1000.dp)
                 .requiredHeight(1000.dp)
         ) {
-           state.images.forEach {
+            state.images.forEach {
                 var offset by remember(it.offset) { mutableStateOf(it.offset) }
                 var width by remember(it.width) { mutableStateOf(it.width) }
                 var height by remember(it.height) { mutableStateOf(it.height) }
@@ -161,24 +161,20 @@ class Screem : Screen {
             )
             if (isVisible) {
 
+
                 state.images.forEach {
-                    LaunchedEffect(it.id) {
-                        println("Launch"+ it.id )
-                    }
-                    LaunchedEffect(state.zIndex) {
-                        println("Launch2"+ state.zIndex )
-                    }
+//                    id = it.id,
+//                    zIndex = state.zIndex,
                     DraggableResizableImage(
-                        id = it.id,
                         original = it.original,
-                        zIndex = state.zIndex,
+                        border = state.zIndex == it.id,
                         resultOffset = { offset, w, h, z ->
                             onChange(
                                 it.copy(
                                     offset = offset,
                                     width = w,
                                     height = h,
-                                ), z
+                                ), z, it.id
                             )
 //                    offset = it
                         })

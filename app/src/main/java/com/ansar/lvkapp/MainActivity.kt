@@ -1,6 +1,5 @@
 package com.ansar.lvkapp
 
-import DraggableResizableImage
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
